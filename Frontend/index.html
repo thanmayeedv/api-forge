@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Forge - Enterprise Admin Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#141414] text-neutral-100 font-sans antialiased selection:bg-red-600 selection:text-white">
+
+<!-- Top Navigation Bar -->
+<header class="bg-black/80 backdrop-blur-md border-b border-neutral-800 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
+        <div class="flex items-center space-x-4">
+            <span class="text-red-600 font-black tracking-tighter text-xl uppercase">API Forge</span>
+            <span class="text-neutral-500 text-sm hidden sm:inline">|</span>
+            <span class="text-neutral-400 text-xs hidden sm:inline tracking-wide font-mono">Spring Boot 4.1.1 &bull; PostgreSQL 17</span>
+        </div>
+        <div class="flex items-center space-x-3">
+            <div id="systemStatus" class="inline-flex items-center px-3 py-1 rounded text-xs font-medium bg-neutral-900 text-neutral-400 border border-neutral-800">
+                <span class="w-1.5 h-1.5 mr-2 bg-neutral-500 rounded-full"></span> Connecting...
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Dashboard Container -->
+<main class="max-w-7xl mx-auto px-6 py-8 space-y-8">
+
+    <!-- Top Metrics Row -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-[#1f1f1f] border border-neutral-800 p-6 rounded-lg shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-semibold text-neutral-400 uppercase tracking-widest">Active Database Records</p>
+                <h3 id="totalUsersCount" class="text-3xl font-bold text-white mt-1 tracking-tight">0</h3>
+            </div>
+            <div class="text-neutral-500 font-mono text-xs uppercase tracking-wider bg-neutral-900 px-3 py-1.5 rounded border border-neutral-800">
+                Table: users
+            </div>
+        </div>
+        <div class="bg-[#1f1f1f] border border-neutral-800 p-6 rounded-lg shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-semibold text-neutral-400 uppercase tracking-widest">Persistence Layer</p>
+                <h3 class="text-base font-medium text-white mt-1 flex items-center">
+                    <span class="w-2 h-2 bg-red-600 rounded-full mr-2"></span> PostgreSQL Connected
+                </h3>
+            </div>
+            <div class="text-neutral-500 font-mono text-xs uppercase tracking-wider bg-neutral-900 px-3 py-1.5 rounded border border-neutral-800">
+                Status: Online
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Grid Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Left Panel: Registration Form & API Key Tool -->
+        <div class="space-y-6 lg:col-span-1">
+            <!-- Register User Panel -->
+            <section class="bg-[#1f1f1f] border border-neutral-800 p-6 rounded-lg shadow-sm">
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-white mb-4 pb-3 border-b border-neutral-800">Register User Identity</h2>
+
+                <form id="userForm" onsubmit="registerUser(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-neutral-400 uppercase tracking-wider mb-1.5">Username</label>
+                        <input type="text" id="username" required placeholder="e.g. john_doe" class="w-full px-3.5 py-2 bg-black border border-neutral-800 rounded text-sm text-white placeholder-neutral-600 focus:border-red-600 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-neutral-400 uppercase tracking-wider mb-1.5">Email Address</label>
+                        <input type="email" id="email" required placeholder="john@domain.com" class="w-full px-3.5 py-2 bg-black border border-neutral-800 rounded text-sm text-white placeholder-neutral-600 focus:border-red-600 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-neutral-400 uppercase tracking-wider mb-1.5">Password</label>
+                        <input type="password" id="password" required placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" class="w-full px-3.5 py-2 bg-black border border-neutral-800 rounded text-sm text-white placeholder-neutral-600 focus:border-red-600 focus:outline-none transition">
+                    </div>
+                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 rounded text-xs tracking-wide transition shadow-sm">
+                        Commit Record to DB
+                    </button>
+                </form>
+                <div id="responseMessage" class="mt-3 text-xs text-center font-medium"></div>
+            </section>
+
+            <!-- API Key Generator Panel -->
+            <section class="bg-[#1f1f1f] border border-neutral-800 p-6 rounded-lg shadow-sm">
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-white mb-4 pb-3 border-b border-neutral-800">Issue API Key & Quota</h2>
+                <form onsubmit="generateApiKey(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-neutral-400 uppercase mb-1.5">Project Name</label>
+                        <input type="text" id="projectName" required placeholder="Analytics Service" class="w-full px-3.5 py-2 bg-black border border-neutral-800 rounded text-xs text-white focus:border-red-600 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-neutral-400 uppercase mb-1.5">Environment</label>
+                        <select id="environment" class="w-full px-3.5 py-2 bg-black border border-neutral-800 rounded text-xs text-white focus:border-red-600 focus:outline-none">
+                            <option value="DEV">DEV</option>
+                            <option value="PROD">PROD</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-neutral-400 uppercase mb-1.5">Quota Limit</label>
+                        <input type="number" id="quotaLimit" value="100" class="w-full px-3.5 py-2 bg-black border border-neutral-800 rounded text-xs text-white focus:border-red-600 focus:outline-none">
+                    </div>
+                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 rounded text-xs transition">
+                        Generate API Key
+                    </button>
+                </form>
+                <div id="apiKeyResult" class="mt-3 text-xs font-mono text-neutral-400 break-all"></div>
+            </section>
+        </div>
+
+        <!-- Right Panel: Data Table & Search -->
+        <section class="bg-[#1f1f1f] border border-neutral-800 p-6 rounded-lg shadow-sm lg:col-span-2 flex flex-col">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-3 border-b border-neutral-800">
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-white">Database Registry</h2>
+                <div class="flex items-center space-x-3 w-full sm:w-auto">
+                    <input type="text" id="searchInput" onkeyup="filterUsers()" placeholder="Filter entries..." class="px-3.5 py-1.5 bg-black border border-neutral-800 rounded text-xs text-white placeholder-neutral-600 focus:border-red-600 focus:outline-none w-full sm:w-56 transition">
+                    <button onclick="loadDashboardData()" class="text-xs bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-800 px-3.5 py-1.5 rounded transition font-medium tracking-wide whitespace-nowrap">
+                        Reload
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto flex-grow">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                    <tr class="bg-black/40 text-neutral-500 text-[11px] uppercase tracking-widest font-mono">
+                        <th class="p-3 border-b border-neutral-800">ID</th>
+                        <th class="p-3 border-b border-neutral-800">Username</th>
+                        <th class="p-3 border-b border-neutral-800">Email</th>
+                        <th class="p-3 border-b border-neutral-800 text-right">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="userTableBody" class="text-sm divide-y divide-neutral-800/60 font-mono text-neutral-300">
+                    <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<!-- JavaScript Application Logic -->
+<script>
+    const API_URL = 'http://localhost:8080/api/users';
+    const KEY_URL = 'http://localhost:8080/api/keys/generate';
+    const HEALTH_URL = 'http://localhost:8080/actuator/health';
+    let allUsers = [];
+
+    window.onload = () => {
+        loadDashboardData();
+        checkSystemHealth();
+    };
+
+    async function checkSystemHealth() {
+        const statusBadge = document.getElementById('systemStatus');
+        try {
+            const res = await fetch(HEALTH_URL);
+            if (res.ok) {
+                statusBadge.className = "inline-flex items-center px-3 py-1 rounded text-xs font-medium bg-red-950/40 text-red-400 border border-red-900/50";
+                statusBadge.innerHTML = `<span class="w-1.5 h-1.5 mr-2 bg-red-600 rounded-full"></span> System Operational`;
+            } else {
+                throw new Error();
+            }
+        } catch {
+            statusBadge.className = "inline-flex items-center px-3 py-1 rounded text-xs font-medium bg-neutral-900 text-neutral-500 border border-neutral-800";
+            statusBadge.innerHTML = `<span class="w-1.5 h-1.5 mr-2 bg-neutral-600 rounded-full"></span> Service Offline`;
+        }
+    }
+
+    async function loadDashboardData() {
+        const tableBody = document.getElementById('userTableBody');
+        tableBody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-neutral-600 font-sans text-xs">Querying data pipeline...</td></tr>`;
+
+        try {
+            const response = await fetch(API_URL);
+            if (!response.ok) throw new Error('Failed to retrieve list');
+
+            allUsers = await response.json();
+            document.getElementById('totalUsersCount').innerText = allUsers.length;
+            renderTable(allUsers);
+        } catch (error) {
+            tableBody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500 font-sans text-xs">Connection error: Unable to communicate with Spring Boot instance.</td></tr>`;
+        }
+    }
+
+    function renderTable(users) {
+        const tableBody = document.getElementById('userTableBody');
+        tableBody.innerHTML = '';
+
+        if (users.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-neutral-600 font-sans text-xs">No records available in database table.</td></tr>`;
+            return;
+        }
+
+        users.forEach(user => {
+            tableBody.innerHTML += `
+                    <tr class="hover:bg-neutral-900/50 transition">
+                        <td class="p-3 text-neutral-500 text-xs">#${user.id}</td>
+                        <td class="p-3 text-white font-sans">${user.username}</td>
+                        <td class="p-3 text-neutral-400 font-sans">${user.email}</td>
+                        <td class="p-3 text-right">
+                            <button onclick="deleteUser(${user.id})" class="text-[11px] font-sans bg-neutral-900 hover:bg-red-950/60 text-neutral-400 hover:text-red-400 border border-neutral-800 hover:border-red-900 px-3 py-1 rounded transition">Drop</button>
+                        </td>
+                    </tr>
+                `;
+        });
+    }
+
+    function filterUsers() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = allUsers.filter(u =>
+            u.username.toLowerCase().includes(query) || u.email.toLowerCase().includes(query)
+        );
+        renderTable(filtered);
+    }
+
+    async function registerUser(event) {
+        event.preventDefault();
+        const msgDiv = document.getElementById('responseMessage');
+
+        const userData = {
+            username: document.getElementById('username').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value
+        };
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+
+            if (response.ok) {
+                msgDiv.className = "mt-3 text-xs text-center font-medium text-red-500 font-sans";
+                msgDiv.innerText = "Record committed successfully with hashed credentials.";
+                document.getElementById('userForm').reset();
+                loadDashboardData();
+            } else {
+                const err = await response.json();
+                throw new Error(err.message || 'Operation rejected');
+            }
+        } catch (error) {
+            msgDiv.className = "mt-3 text-xs text-center font-medium text-red-500 font-sans";
+            msgDiv.innerText = "Error: " + error.message;
+        }
+    }
+
+    async function generateApiKey(event) {
+        event.preventDefault();
+        const projectName = document.getElementById('projectName').value;
+        const environment = document.getElementById('environment').value;
+        const quotaLimit = document.getElementById('quotaLimit').value;
+        const resultDiv = document.getElementById('apiKeyResult');
+
+        try {
+            const response = await fetch(`${KEY_URL}?projectName=${encodeURIComponent(projectName)}&environment=${encodeURIComponent(environment)}&quotaLimit=${quotaLimit}`, {
+                method: 'POST'
+            });
+            if (response.ok) {
+                const data = await response.json();
+                resultDiv.className = "mt-3 text-xs font-mono text-red-400 break-all bg-black p-3 rounded border border-neutral-800";
+                resultDiv.innerText = `Key: ${data.keyValue} (Quota: ${data.quotaLimit})`;
+            } else {
+                throw new Error('Failed to generate key');
+            }
+        } catch (err) {
+            resultDiv.className = "mt-3 text-xs font-mono text-red-500";
+            resultDiv.innerText = "Error generating API key.";
+        }
+    }
+
+    async function deleteUser(id) {
+        if (!confirm(`Confirm deletion of record ID #${id}?`)) return;
+
+        try {
+            const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+            if (response.ok) {
+                loadDashboardData();
+            } else {
+                alert('Execution failed on server.');
+            }
+        } catch (error) {
+            alert('Connection failure.');
+        }
+    }
+</script>
+</body>
+</html>
