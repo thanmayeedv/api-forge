@@ -1,0 +1,12 @@
+{
+  "buildCommand": null,
+  "outputDirectory": null,
+  "framework": null,
+  "installCommand": null,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/$1"
+    }
+  ]
+}
